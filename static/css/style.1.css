@@ -1,0 +1,25 @@
+body {
+    background-color: #fafbfc !important;
+}
+
+table {
+    border-radius: 25px;
+    border: 1px solid lightgrey;
+}
+
+th {
+    background-color: lightgrey !important;
+}
+
+.table-hover tbody tr:hover td {
+    background: #edfaff;
+}
+
+.selectable {
+    cursor: pointer;
+}
+
+div.grid-scroll {
+    height: 200px;
+    overflow-y: scroll;
+}

@@ -1,0 +1,27 @@
+name: opsx
+
+services:
+
+  #  start Postgres, and ensure that data is stored to a mounted volume
+  postgres:
+    image: 'postgres:17.5-alpine'
+    container_name: postgres-opsx
+    ports:
+      - "5432:5432"
+    restart: no
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: opsx
+    volumes:
+      - F:/DockerData/opsx/postgres/:/var/lib/postgresql/data/
+
+  #  start Redis, and ensure that data is stored to a mounted volume
+  redis:
+    image: 'redis:7.4-alpine'
+    container_name: redis-opsx
+    ports:
+      - "6379:6379"
+    restart: no
+    volumes:
+      - F:/DockerData/opsx/redis/:/data

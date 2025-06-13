@@ -1,0 +1,21 @@
+package templates
+
+templ Home() {
+    @Layout("Home", nil) {
+        <div class="container">
+            <div class="row">
+                <div class="d-flex p-5 justify-content-center">
+                    <h3>OpsX</h3>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#infoModal">
+                View Update
+            </button>
+        </div>
+
+    }
+    @Modal("infoModal", "System Update") {
+        <p>OpsX has been updated successfully.</p>
+        <button class="btn btn-success" data-bs-dismiss="modal">OK</button>
+    }
+}
