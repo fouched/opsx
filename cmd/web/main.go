@@ -49,7 +49,7 @@ func initApp() (*config.App, error) {
 
 	setConfig(app)
 	initLoggers(app)
-	initDecoder(app)
+	initFormDecoder(app)
 
 	err := initDatabase(app)
 	if err != nil {
@@ -97,7 +97,7 @@ func initLoggers(app *config.App) {
 	app.ErrorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 }
 
-func initDecoder(app *config.App) {
+func initFormDecoder(app *config.App) {
 	app.Decoder = schema.NewDecoder()
 }
 
