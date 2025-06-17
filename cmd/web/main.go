@@ -1,11 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"github.com/alexedwards/scs/v2"
 	"github.com/fouched/opsx/internal/config"
+	"github.com/fouched/opsx/internal/driver"
 	"github.com/fouched/opsx/internal/handlers"
 	"github.com/fouched/opsx/internal/render"
+	"github.com/fouched/opsx/internal/repo"
 	"github.com/gorilla/schema"
+	"github.com/pelletier/go-toml/v2"
 	"log"
 	"net/http"
 	"os"
@@ -26,7 +30,7 @@ func main() {
 
 	mux := routes(h)
 	srv := &http.Server{
-		Addr:    app.Port,
+		Addr:    fmt.Sprintf(":%d", app.Port),
 		Handler: mux,
 	}
 
@@ -38,19 +42,23 @@ func main() {
 }
 
 func newApp() (*config.App, error) {
+	app := &config.App{}
+
+	setConfig(app)
+	initLoggers(app)
+	initDecoder(app)
+
+	err := initDatabase(app)
+	if err != nil {
+		return nil, err
+	}
+
+	app.Repo = config.Repo{
+		RemoteAppRepo: repo.NewRemoteAppRepo(app.DB),
+	}
 
 	session = initSession()
-
-	debugLog, infoLog, errorLog := initLogger()
-
-	app := &config.App{
-		Port:     ":9080",
-		Decoder:  initDecoder(),
-		DebugLog: debugLog,
-		InfoLog:  infoLog,
-		ErrorLog: errorLog,
-		Session:  session,
-	}
+	app.Session = session
 
 	// set up template rendering
 	render.NewRenderer(app)
@@ -58,15 +66,45 @@ func newApp() (*config.App, error) {
 	return app, nil
 }
 
-func initDecoder() *schema.Decoder {
-	return schema.NewDecoder()
+func setConfig(app *config.App) {
+	env := os.Getenv("OPSX_ENV")
+	if env == "" {
+		env = "development"
+	}
+
+	configFile := "config." + env + ".toml"
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		configFile = "config.toml" // Fallback to default
+	}
+
+	data, err := os.ReadFile(configFile)
+	if err != nil {
+		log.Fatalf("Error reading config file: %v", err)
+	}
+
+	if err := toml.Unmarshal(data, app); err != nil {
+		log.Fatalf("Error parsing TOML: %v", err)
+	}
+
 }
 
-func initLogger() (*log.Logger, *log.Logger, *log.Logger) {
-	debugLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-	return debugLog, infoLog, errorLog
+func initLoggers(app *config.App) {
+	app.DebugLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	app.InfoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	app.ErrorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+}
+
+func initDecoder(app *config.App) {
+	app.Decoder = schema.NewDecoder()
+}
+
+func initDatabase(app *config.App) error {
+	dbPool, err := driver.ConnectSQL(app.DSN)
+	if err != nil {
+		return err
+	}
+	app.DB = dbPool
+	return nil
 }
 
 func initSession() *scs.SessionManager {

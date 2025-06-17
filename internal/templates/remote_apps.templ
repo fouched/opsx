@@ -1,0 +1,89 @@
+package templates
+
+import (
+    "github.com/fouched/opsx/internal/render"
+    "github.com/fouched/opsx/internal/models"
+)
+
+templ RemoteAppGrid(apps []models.RemoteApp) {
+    @Layout("Remote Apps", nil) {
+        <div class="container" id="apps">
+            <div class="row">
+                <div class="d-flex mt-3 mb-2">
+                    <h5 class="me-auto">Manage Remote Applications</h5>
+                    <div><a href="/remote_apps/add" class="btn btn-sm btn-primary">New</a></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="table-responsive grid-scroll">
+                    <table class="table table-sm table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th class="col-3">Name</th>
+                            <th class="col-2">Type</th>
+                            <th class="col-3">Host</th>
+                            <th class="col-1">Status</th>
+                            <th class="col-3">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="searchResult">
+                            for _, a := range apps {
+                                @RemoteAppRow(a, nil)
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="appDetails" class="row mt-3">
+                <div class="col-12 text-center text-success">
+                    Click on an app to load details
+                </div>
+            </div>
+        </div>
+    }
+}
+
+templ RemoteAppRow(a models.RemoteApp, n *render.Notification) {
+    <tr
+            id={ "remote_apps_" + a.ID }
+            class={ "text-nowrap", templ.KV("table-success", n != nil && n.Success != ""), templ.KV("table-danger", n != nil && n.Error != "") }
+    >
+        <td class="selectable"
+            hx-get={ "/remote_apps/" + a.ID }
+            hx-trigger="click"
+            hx-target="#appDetails"
+            hx-swap="innerHTML">{a.Name}
+        </td>
+        <td>{a.Type}</td>
+        <td>{a.Host}</td>
+        <td>{a.Status}</td>
+        <td class="d-flex flex-nowrap">
+            <button class="btn btn-sm btn-success me-1"
+                    hx-get={ "/remote_apps/start/" + a.ID }
+                    hx-trigger="click"
+                    hx-target="#appDetails"
+                    hx-swap="innerHTML"
+            >Start</button>
+            <button
+                    id="customer-delete-btn"
+                    class="btn btn-sm btn-warning me-1"
+                    hx-get={ "/remote_apps/stop/" + a.ID }
+                    hx-target={ "#remote_apps_" + a.ID }
+                    hx-swap="outerHTML"
+            >Stop</button>
+            <button class="btn btn-sm btn-primary me-1"
+                    hx-get={ "/remote_apps/" + a.ID }
+                    hx-trigger="click"
+                    hx-target="#appDetails"
+                    hx-swap="innerHTML"
+            >Edit</button>
+            <button
+                    id="customer-delete-btn"
+                    class="btn btn-sm btn-danger"
+                    hx-delete={ "/remote_apps/" + a.ID }
+                    hx-target={ "#remote_apps_" + a.ID }
+                    hx-swap="outerHTML"
+            >Delete</button>
+        </td>
+    </tr>
+}

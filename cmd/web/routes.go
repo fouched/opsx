@@ -15,8 +15,9 @@ func routes(h *handlers.Handlers) http.Handler {
 	// Root and health check
 	r.Get("/", h.Home)
 
-	// Future:
-	// r.Route("/services", func(r chi.Router) { ... })
+	r.Route("/apps", func(r chi.Router) {
+		r.Get("/", h.AllApps)
+	})
 	// r.Route("/env", func(r chi.Router) { ... })
 
 	fileServer := http.FileServer(http.Dir("./static/"))
