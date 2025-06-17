@@ -25,6 +25,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// we have database connectivity, close it after app stops
+	defer app.DB.Close()
+
 	// Create handlers instance with dependency
 	h := handlers.NewHandlers(app)
 
@@ -103,6 +106,7 @@ func initDatabase(app *config.App) error {
 	if err != nil {
 		return err
 	}
+	app.InfoLog.Println("Connected to database")
 	app.DB = dbPool
 	return nil
 }

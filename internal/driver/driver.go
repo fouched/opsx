@@ -5,14 +5,6 @@ import (
 	"time"
 )
 
-//// DB holds database connection pool
-//type DB struct {
-//	SQL *sql.DB
-//}
-
-// initialize and make empty in one step
-//var dbConn = &DB{}
-
 // ConnectSQL creates database pool
 func ConnectSQL(dsn string) (*sql.DB, error) {
 	d, err := getConn(dsn)
