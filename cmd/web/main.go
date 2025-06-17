@@ -20,7 +20,7 @@ import (
 var session *scs.SessionManager
 
 func main() {
-	app, err := newApp()
+	app, err := initApp()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func main() {
 	}
 }
 
-func newApp() (*config.App, error) {
+func initApp() (*config.App, error) {
 	app := &config.App{}
 
 	setConfig(app)
